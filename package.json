@@ -1,0 +1,94 @@
+{
+	"name": "leanvscode",
+	"displayName": "LeanVSCode",
+	"description": "Backtest your local trading strategies using QuantConnect's LEAN cloud platform",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.31.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onLanguage:python",
+		"onLanguage:csharp",
+		"onLanguage:fsharp"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "QuantConnect Backtesting Configuration",
+			"properties": {
+				"quantconnect.cloudApiUrl": {
+					"type": "string",
+					"default": "https://www.quantconnect.com/api/v2/",
+					"description": "URL to LEAN Rest API. Configurable for non-QC LEAN instances"
+				},
+				"quantconnect.apiKey": {
+					"type": [
+						"null",
+						"string"
+					],
+					"default": null,
+					"description": "QuantConnect API key. Required for backtesting and syntax checking. Key is obtainable from https://www.quantconnect.com/account"
+				},
+				"quantconnect.userId": {
+					"type": [
+						"null",
+						"string"
+					],
+					"default": null,
+					"description": "QuantConnect userID. Required for backtesting and syntax checking. UserID is obtainable from https://www.quantconnect.com/account"
+				}
+			}
+		},
+		"commands": [
+			{
+				"command": "extension.backtest",
+				"category": "QuantConnect",
+				"title": "Save and run backtest"
+			},
+			{
+				"command": "extension.save",
+				"category": "QuantConnect",
+				"title": "Save project to the QuantConnect web platform"
+			},
+			{
+				"command": "extension.viewBacktests",
+				"category": "QuantConnect",
+				"title": "View current project backtests"
+			},
+			{
+				"command": "extension.newProject",
+				"category": "QuantConnect",
+				"title": "Create a new project for your current files"
+			},
+			{
+				"command": "extension.downloadProject",
+				"category": "QuantConnect",
+				"title": "Download a current project to your current directory"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm run compile && node ./node_modules/vscode/bin/test"
+	},
+	"devDependencies": {
+		"typescript": "^3.3.1",
+		"vscode": "^1.1.28",
+		"tslint": "^5.12.1",
+		"@types/node": "^10.12.21",
+		"@types/mocha": "^2.2.42"
+	},
+	"dependencies": {
+		"@types/request": "^2.48.1",
+		"@types/request-promise-native": "^1.0.15",
+		"request": "^2.88.0",
+		"request-promise-native": "^1.0.7"
+	}
+}
