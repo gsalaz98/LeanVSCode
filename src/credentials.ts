@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { LeanApi } from './api';
 
 /**
  * Manages credential related tasks. 
@@ -8,20 +9,23 @@ import * as vscode from 'vscode';
  * missing information.
  * 
  * Can update configuration once a user supplies
- * a valid API key and userID. 
+ * a valid API key and userID.
+ * 
+ * Contains an API instance. Use this class to query the QuantConnect API
  */
 export class CredentialManager {
+    /**User API key. Obtainable from https://www.quantconnect.com/accounts */
     private apiKey?: string;
+    /**User ID. Obtainable from https://www.quantconnect.com/accounts */
     private userId?: string;
+    /**Lean API instance*/
+    private api!: LeanApi;
 
-    constructor() {
-        let workspaceConfig = vscode.workspace.getConfiguration('quantconnect');
+    constructor(context: vscode.ExtensionContext) {
+        const workspaceConfig = vscode.workspace.getConfiguration('quantconnect');
 
         this.apiKey = workspaceConfig.get('apiKey');
         this.userId = workspaceConfig.get('userId');
-
-        console.log(this.apiKey);
-        console.log(this.userId);
 
         if (!this.apiKey || !this.userId) {
             CredentialManager.promptForApiKey().then(apiKey => {
@@ -36,8 +40,22 @@ export class CredentialManager {
                 this.userId = userId;
                 // Updates the config file to include the user's ID
                 workspaceConfig.update('userId', userId);
+            })
+            .then(() => {
+                this.initializeApi();
             });
+            
+            // Prevents the API from being initialized twice
+            return;
         }
+        this.initializeApi();
+    }
+
+    /**
+     * Gets the API instance
+     */
+    public getApi(): LeanApi {
+        return this.api;
     }
 
     /**Gets the QuantConnect user's API key
@@ -76,7 +94,21 @@ export class CredentialManager {
         this.userId = userId;
     }
 
-    private static async promptEditSettings(): Promise<void> {}
+    /**
+     * Initialize the Lean API instance and check for valid credentials
+     */
+    private initializeApi() {
+        this.api = new LeanApi(this.apiKey, this.userId);
+
+        this.api.authenticated().then(authenticated => {
+            if (!authenticated) {
+                vscode.window.showErrorMessage('The API credentials you supplied are not valid');
+            } 
+            else {
+                vscode.window.showInformationMessage('Connected to QuantConnect API');
+            }
+        });
+    }
 
     /**
      * Prompt the user for their API key using a form
@@ -102,12 +134,12 @@ export class CredentialManager {
         return vscode.window.showInputBox({
             prompt: 'Enter your QuantConnect User ID',
             ignoreFocusOut: true,
-		})
+        })
         .then((userId: string | undefined) => {
-		    if (userId === undefined) {
+            if (userId === undefined) {
                 vscode.window.showErrorMessage('In order to use the QuantConnect extension, you must provide a user ID. You can provide the API key in the workspace `settings.json` file');
             }
             return userId;
-		});
+        });
     }
 }

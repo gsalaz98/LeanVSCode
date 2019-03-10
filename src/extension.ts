@@ -4,13 +4,15 @@ import * as vscode from 'vscode';
 
 import { QCAlgorithmProject } from './backtest';
 import { CredentialManager } from './credentials';
+import { LeanApi } from './api';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	// Prompt the user for their API key if they haven't entered it yet
-	context.workspaceState.update('quantconnectCredentialManager', new CredentialManager());
-	
+	const credentialManager = new CredentialManager(context);
+	context.workspaceState.update('quantconnectCredentialManager', credentialManager);
+
 	// Project name as key
 	context.globalState.update('quantconnectProjects', new Map<string, QCAlgorithmProject>());
 }
