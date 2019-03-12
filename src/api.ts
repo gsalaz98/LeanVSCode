@@ -99,13 +99,13 @@ type Statistics = {
     [K in StatisticsKey]: string;
 };
 
-interface AlgorithmPerformance {
+export interface AlgorithmPerformance {
     TradeStatistics: TradeStatistics;
     PortfolioStatistics: PortfolioStatistics;
     ClosedTrades: Trade[];
 }
 
-interface AlphaRuntimeStatistics {
+export interface AlphaRuntimeStatistics {
     MeanPopulationScore: MeanPopulationScore;
     RollingAveragedPopulationScore: RollingAveragedPopulationScore;
     LongCount: number;
@@ -119,7 +119,7 @@ interface AlphaRuntimeStatistics {
     MeanPopulationEstimatedInsightValue: number;
 }
 
-interface BaseLiveAlgorithmSettings {
+export interface BaseLiveAlgorithmSettings {
     id: string;
     user: string;
     password: string;
@@ -127,7 +127,7 @@ interface BaseLiveAlgorithmSettings {
     account: string;
 }
 
-interface Holding {
+export interface Holding {
     Symbol: Symbol;
     Type: SecurityType;
     CurrencySymbol: string;
@@ -139,30 +139,30 @@ interface Holding {
     UnrealizedPnL: number;
 }
 
-interface HoldingIndexer {
+export interface HoldingIndexer {
     [key: string]: Holding;
 }
 
-interface LiveResult extends Result {
+export interface LiveResult extends Result {
     Holdings: HoldingIndexer;
     Cash: undefined; //TODO: Implement CashBook
     ServerStatistics: ServerStatistics;
 }
 
-interface LiveResultsData {
+export interface LiveResultsData {
     version: number;
     resolution: Resolution;
     results: LiveResult;
 }
 
-interface MeanPopulationScore {
+export interface MeanPopulationScore {
     UpdatedTimeUtc: Date;
     Direction: TradeDirection;
     Magnitude: number;
     IsFinalScore: boolean;
 }
 
-interface Order {
+export interface Order {
     Type: number;
     Id: number;
     ContingentId: number;
@@ -188,25 +188,25 @@ interface Order {
     IsMarketable: boolean;
 }
 
-interface Orders {
+export interface Orders {
     [key: string]: Order;
 }
 
-interface OrderSubmissionData {
+export interface OrderSubmissionData {
     BidPrice: number;
     AskPrice: number;
     LastPrice: number;
 }
 
-interface ProfitLoss {
+export interface ProfitLoss {
     [key: string]: number;
 }
 
-interface Properties {
+export interface Properties {
     [key: string]: any;
 }
 
-interface PortfolioStatistics {
+export interface PortfolioStatistics {
     AverageWinRate: number;
     AverageLossRate: number;
     ProfitLossRatio: number;
@@ -226,33 +226,33 @@ interface PortfolioStatistics {
     TreynorRatio: number;
 }
 
-interface RollingAveragedPopulationScore {
+export interface RollingAveragedPopulationScore {
     UpdatedTimeUtc: Date;
     Direction: TradeDirection;
     Magnitude: number;
     IsFinalScore: boolean;
 }
 
-interface RollingWindow {
+export interface RollingWindow {
     [key: string]: AlgorithmPerformance;
 }
 
-interface ServerStatistics {
+export interface ServerStatistics {
     [key: string]: string;
 }
 
-interface Symbol {
+export interface Symbol {
     $type: string;
     Value: string;
     ID: string;
     Permtick: string;
 }
 
-interface TimeInForce {
+export interface TimeInForce {
     $type: string;
 }
 
-interface Trade {
+export interface Trade {
     Symbol: Symbol;
     EntryTime: Date;
     EntryPrice: number;
@@ -268,7 +268,7 @@ interface Trade {
     EndTradeDrawdown: number;
 }
 
-interface TradeStatistics {
+export interface TradeStatistics {
     StartDateTime: Date;
     EndDateTime: Date;
     TotalNumberOfTrades: number;
@@ -309,7 +309,7 @@ interface TradeStatistics {
     TotalFees: number;
 }
 
-interface Backtest extends FailureResponse {
+export interface Backtest extends FailureResponse {
     name: string;
     note?: string;
     backtestId: string;
@@ -321,20 +321,20 @@ interface Backtest extends FailureResponse {
     created: Date;
 }
 
-interface BacktestList extends FailureResponse {
+export interface BacktestList extends FailureResponse {
     backtests: Backtest[];
 }
 
-interface BacktestReport extends FailureResponse {
+export interface BacktestReport extends FailureResponse {
     report: string;
 }
 
-interface FailureResponse {
+export interface FailureResponse {
     success: boolean;
     errors: string[];
 }
 
-interface Result {
+export interface Result {
     IsFrameworkAlgorithm: boolean;
     AlphaRuntimeStatistics?: AlphaRuntimeStatistics;
     /**As per QuantConnect's TOS, we might have to omit the Charts results.
@@ -347,18 +347,18 @@ interface Result {
     RuntimeStatistics: RuntimeStatistics;
 }
 
-interface BacktestResult extends Result {
+export interface BacktestResult extends Result {
     RollingWindow: RollingWindow;
     TotalPerformance?: AlgorithmPerformance;
 }
 
-interface Compile extends FailureResponse {
+export interface Compile extends FailureResponse {
     compileId: string;
     state: CompileState;
     logs: string[];
 }
 
-interface LiveAlgorithm extends FailureResponse {
+export interface LiveAlgorithm extends FailureResponse {
     projectId: number;
     deployId: string;
     status: AlgorithmStatus;
@@ -369,7 +369,7 @@ interface LiveAlgorithm extends FailureResponse {
     error: string;
 }
 
-interface LiveAlgorithmApiSettingsWrapper {
+export interface LiveAlgorithmApiSettingsWrapper {
     versionId: string;
     projectId: number;
     compileId: string;
@@ -377,19 +377,19 @@ interface LiveAlgorithmApiSettingsWrapper {
     brokerage: BaseLiveAlgorithmSettings;
 }
 
-interface LiveAlgorithmResults extends FailureResponse {
+export interface LiveAlgorithmResults extends FailureResponse {
     LiveResults: LiveResultsData;
 }
 
-interface LiveList extends FailureResponse {
+export interface LiveList extends FailureResponse {
     live: LiveAlgorithm[];
 }
 
-interface LiveLog extends FailureResponse {
+export interface LiveLog extends FailureResponse {
     LiveLogs: string[];
 }
 
-interface Project extends FailureResponse {
+export interface Project extends FailureResponse {
     projectId: number;
     name: string;
     created: Date;
@@ -397,17 +397,17 @@ interface Project extends FailureResponse {
     language: Language;
 }
 
-interface ProjectFile extends FailureResponse {
+export interface ProjectFile extends FailureResponse {
     name: string;
     content: string;
     modified: Date;
 }
 
-interface ProjectResponse extends FailureResponse {
+export interface ProjectResponse extends FailureResponse {
     projects: Project[];
 }
 
-interface ProjectFilesResponse extends FailureResponse {
+export interface ProjectFilesResponse extends FailureResponse {
     files: ProjectFile[];
 }
 

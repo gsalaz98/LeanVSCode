@@ -12,7 +12,9 @@
 	"activationEvents": [
 		"onLanguage:python",
 		"onLanguage:csharp",
-		"onLanguage:fsharp"
+		"onLanguage:fsharp",
+
+		"onCommand:extension.createOrDownloadProject"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -24,6 +26,11 @@
 					"type": "string",
 					"default": "https://www.quantconnect.com/api/v2/",
 					"description": "URL to LEAN Rest API. Configurable for non-QC LEAN instances"
+				},
+				"quantconnect.workspaceAsRootPath": {
+					"type": "boolean",
+					"default": false,
+					"description": "Setup projects in the root workspace folder instead of creating a new folder for each project"
 				},
 				"quantconnect.apiKey": {
 					"type": [
@@ -50,24 +57,9 @@
 				"title": "Save and run backtest"
 			},
 			{
-				"command": "extension.save",
+				"command": "extension.createOrDownloadProject",
 				"category": "QuantConnect",
-				"title": "Save project to the QuantConnect web platform"
-			},
-			{
-				"command": "extension.viewBacktests",
-				"category": "QuantConnect",
-				"title": "View current project backtests"
-			},
-			{
-				"command": "extension.newProject",
-				"category": "QuantConnect",
-				"title": "Create a new project for your current files"
-			},
-			{
-				"command": "extension.downloadProject",
-				"category": "QuantConnect",
-				"title": "Download a current project to your current directory"
+				"title": "Create a new project or download an existing project"
 			}
 		]
 	},

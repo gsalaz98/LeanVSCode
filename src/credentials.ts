@@ -21,8 +21,8 @@ export class CredentialManager {
     /**Lean API instance*/
     private api!: LeanApi;
 
-    constructor(context: vscode.ExtensionContext) {
-        const workspaceConfig = vscode.workspace.getConfiguration('quantconnect');
+    constructor() {
+        const workspaceConfig = vscode.workspace.getConfiguration('quantconnect'); 
 
         this.apiKey = workspaceConfig.get('apiKey');
         this.userId = workspaceConfig.get('userId');
@@ -31,7 +31,8 @@ export class CredentialManager {
             CredentialManager.promptForApiKey().then(apiKey => {
                 this.apiKey = apiKey;
                 // Updates the config file to include the user's API key
-                workspaceConfig.update('apiKey', apiKey);
+                workspaceConfig.update('apiKey', apiKey, vscode.ConfigurationTarget.Workspace);
+                workspaceConfig.update('apiKey', apiKey, vscode.ConfigurationTarget.Global);
             })
             .then(() => {
                 return CredentialManager.promptForUserId();
@@ -39,7 +40,8 @@ export class CredentialManager {
             .then(userId => {
                 this.userId = userId;
                 // Updates the config file to include the user's ID
-                workspaceConfig.update('userId', userId);
+                workspaceConfig.update('userId', userId, vscode.ConfigurationTarget.Workspace);
+                workspaceConfig.update('userId', userId, vscode.ConfigurationTarget.Global);
             })
             .then(() => {
                 this.initializeApi();
@@ -53,8 +55,10 @@ export class CredentialManager {
 
     /**
      * Gets the API instance
+     * 
+     * @public
      */
-    public getApi(): LeanApi {
+    public get getApi(): LeanApi {
         return this.api;
     }
 
@@ -62,7 +66,7 @@ export class CredentialManager {
      * 
      * @public
     */
-    public getApiKey(): string | undefined {
+    public get getApiKey(): string | undefined {
         return this.apiKey;
     }
 
@@ -70,7 +74,7 @@ export class CredentialManager {
      * 
      * @public
     */
-    public getUserId(): string | undefined {
+    public get getUserId(): string | undefined {
         return this.userId;
     }
 
@@ -80,7 +84,7 @@ export class CredentialManager {
      * @param apiKey User's QuantConnect API key. You can obtain this value from https://www.quantconnect.com/account
      * @protected
      */
-    protected setApiKey(apiKey: string): void {
+    protected set setApiKey(apiKey: string) {
         this.apiKey = apiKey;
     }
 
@@ -90,12 +94,14 @@ export class CredentialManager {
      * @param userId User's QuantConnect user ID. You can obtain this value from https://www.quantconnect.com/account
      * @protected
      */
-    protected setUserId(userId: string): void {
+    protected set setUserId(userId: string) {
         this.userId = userId;
     }
 
     /**
      * Initialize the Lean API instance and check for valid credentials
+     * 
+     * @private
      */
     private initializeApi() {
         this.api = new LeanApi(this.apiKey, this.userId);
@@ -118,6 +124,7 @@ export class CredentialManager {
         return vscode.window.showInputBox({
             prompt: 'Enter your QuantConnect API key',
             ignoreFocusOut: true,
+            password: true
 		})
 		.then((apiKey: string | undefined) => {
 		    if (apiKey === undefined) {

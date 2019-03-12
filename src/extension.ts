@@ -1,21 +1,32 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-
-import { QCAlgorithmProject } from './backtest';
+import { QCAlgorithmProject } from './project';
 import { CredentialManager } from './credentials';
-import { LeanApi } from './api';
+import { Language, LeanApi } from './api';
 
+export let Projects: QCAlgorithmProject[] = [];
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	// Prompt the user for their API key if they haven't entered it yet
-	const credentialManager = new CredentialManager(context);
-	context.workspaceState.update('quantconnectCredentialManager', credentialManager);
+    let credManager = context.workspaceState.get<CredentialManager>('quantconnectCredentialManager');
 
-	// Project name as key
-	context.globalState.update('quantconnectProjects', new Map<string, QCAlgorithmProject>());
+    if (!credManager) {
+        // Prompt the user for their API key if they haven't entered it yet
+        credManager = new CredentialManager();
+        context.workspaceState.update('quantconnectCredentialManager', credManager);
+    } 
+    else if (!credManager.getApiKey || !credManager.getUserId) {
+        credManager = new CredentialManager();
+        context.workspaceState.update('quantconnectCredentialManager', credManager);
+    }
+
+    let selectOrCreateProject = vscode.commands.registerCommand('extension.createOrDownloadProject', () => QCAlgorithmProject.createOrDownloadProject(context, credManager!));
+
+    context.subscriptions.push(selectOrCreateProject);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    console.log('Deactivated');
+}
