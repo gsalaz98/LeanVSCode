@@ -14,7 +14,8 @@
 		"onLanguage:csharp",
 		"onLanguage:fsharp",
 
-		"onCommand:extension.createOrDownloadProject"
+		"onCommand:extension.createOrDownloadProject",
+		"onCommand:extension.saveFileChangesToCloud"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -31,6 +32,16 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Setup projects in the root workspace folder instead of creating a new folder for each project"
+				},
+				"quantconnect.uploadOnSave": {
+					"type": "boolean",
+					"default": true,
+					"description": "Automatically sync to cloud on file save"
+				},
+				"quantconnect.uploadSkipDialog": {
+					"type": "boolean",
+					"default": false,
+					"description": "Skip the 'overwrite file' warning on file save and write to the cloud automatically"
 				},
 				"quantconnect.apiKey": {
 					"type": [
@@ -60,6 +71,11 @@
 				"command": "extension.createOrDownloadProject",
 				"category": "QuantConnect",
 				"title": "Create a new project or download an existing project"
+			},
+			{
+				"command": "extension.saveFileChangesToCloud",
+				"category": "QuantConnect",
+				"title": "Save file to the cloud and check for errors"
 			}
 		]
 	},
