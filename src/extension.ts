@@ -8,7 +8,7 @@ import { Language, LeanApi } from './api';
 /**
  * Store all currently active projects here. 
  */
-export let VERSION = '0.0.1';
+export let VERSION = '0.0.2';
 export let Projects: QCAlgorithmProject[] = [];
 export let CredManager = new CredentialManager();
 export let StatusBar: vscode.StatusBarItem;
