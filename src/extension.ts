@@ -8,12 +8,16 @@ import { Language, LeanApi } from './api';
 /**
  * Store all currently active projects here. 
  */
+export let VERSION = '0.0.1';
 export let Projects: QCAlgorithmProject[] = [];
 export let CredManager = new CredentialManager();
+export let StatusBar: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
     // Take any projects stored in the global state and recreate the objects to get back context
     initProjects(context, CredManager);
+
+    StatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
     let selectOrCreateProject = vscode.commands.registerCommand('extension.createOrDownloadProject', () => QCAlgorithmProject.createOrDownloadProject(context, CredManager));
     let saveFileToCloud = vscode.commands.registerCommand('extension.saveFileChangesToCloud', () => QCAlgorithmProject.saveFileChangesToCloud());
@@ -30,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    let onFileSave = vscode.workspace.onDidSaveTextDocument((e) => {
+    let onFileSave = vscode.workspace.onDidSaveTextDocument((_) => {
         if (!vscode.workspace.getConfiguration('quantconnect').get<boolean>('uploadOnSave', false)) {
             return;
         }
@@ -38,10 +42,15 @@ export function activate(context: vscode.ExtensionContext) {
         QCAlgorithmProject.saveFileChangesToCloud();
     });
 
+    let onWindowChange = vscode.window.onDidChangeActiveTextEditor(updateStatusBar);
+
     context.subscriptions.push(selectOrCreateProject);
     context.subscriptions.push(saveFileToCloud);
     context.subscriptions.push(onConfigChange);
     context.subscriptions.push(onFileSave);
+    context.subscriptions.push(onWindowChange);
+
+    updateStatusBar();
 }
 
 // this method is called when your extension is deactivated
@@ -56,11 +65,11 @@ function initProjects(context: vscode.ExtensionContext, credManager: CredentialM
         return;
     }
     for (let i = 0; i < projects.length; i++) {
-        // Don't bother creating new projects if we've deleted the directories
-        if (!fs.existsSync(QCAlgorithmProject.normalizeProjectName(projects[i].projectName))) {
+        // Don't bother creating new project directories if we've already deleted them
+        if (!fs.existsSync(projects[i].projectPath)) {
             continue;
         }
-        Projects.push(new QCAlgorithmProject(
+        let project = new QCAlgorithmProject(
             context, 
             credManager, 
             projects[i].projectName, 
@@ -68,6 +77,35 @@ function initProjects(context: vscode.ExtensionContext, credManager: CredentialM
             false, 
             true, 
             projects[i].projectId
-        ));
+        );
+
+        if (project.projectId === undefined) {
+            let result = project.setProjectIdFromProjectName();
+
+            if (!result) {
+                vscode.window.showErrorMessage('Unable to get project id for project after refresh');
+            }
+        }
+        Projects.push(project);
     }
+}
+
+function updateStatusBar() {
+    let project = QCAlgorithmProject.getOpenProject();
+    let file = QCAlgorithmProject.getOpenFile(project);
+
+    if (!project) {
+        StatusBar.text = 'QuantConnect: No project selected';
+        StatusBar.show();
+        return;
+    }
+
+    if (!file) {
+        StatusBar.text = 'QuantConnect: No file selected';
+        StatusBar.show();
+        return;
+    }
+
+    StatusBar.text = `QuantConnect: ${project.projectLanguage} - ${project.projectName}/${path.basename(file.filePath)}`;
+    StatusBar.show();
 }

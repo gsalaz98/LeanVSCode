@@ -280,28 +280,59 @@ export class QCAlgorithmProject {
     }
 
     /**
+     * Sometimes, the project id is not initialized along with the rest of the object.
+     * We want to make sure we can recover the project ID from a project name
+     */
+    public setProjectIdFromProjectName(): boolean {
+        let projectId: number | undefined;
+
+        this.api.listProjects().then(response => {
+            if (response.projects.length === 0) {
+                throw new Error('Tried to list projects, but no projects were found');
+            }
+            if (response.projects.length === 1) {
+                projectId = response.projects[0].projectId;
+            }
+            else {
+                projectId = response.projects.reduce((prev, curr) => {
+                    if (curr.modified > prev.modified) {
+                        return curr;
+                    }
+                    return prev;
+                }).projectId;
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            vscode.window.showErrorMessage(err);
+        });
+
+        if (projectId === undefined) {
+            return false;
+        }
+
+        this.projectId = projectId;
+        return true;
+    }
+
+    /**
      * Save a single file in the current project to the cloud.
      * Will prompt the user for confirmation to avoid accidental saving
      */
-    public static async saveFileChangesToCloud() {
+    public static saveFileChangesToCloud() {
         let project = QCAlgorithmProject.getOpenProject();
-        let doc = vscode.window.activeTextEditor;
+        let file = QCAlgorithmProject.getOpenFile(project);
 
-        if (!doc) {
-            return;
-        }
         if (!project) {
+            vscode.window.showErrorMessage('You must have a project open in order to save changes to the cloud');
+            return;
+        }
+        if (!file) {
+            vscode.window.showErrorMessage('You must have an open file in order to save changes to the cloud');
             return;
         }
 
-        let filePath = doc.document.fileName;
-
-        for (let file of project.files) {
-            if (file.filePath === filePath) {
-                project.saveFileToCloud(file);
-                break; 
-            }
-        }
+        project.saveFileToCloud(file);
     }
 
     /**
@@ -312,6 +343,7 @@ export class QCAlgorithmProject {
         let project = QCAlgorithmProject.getOpenProject();
         
         if (!project) {
+            vscode.window.showErrorMessage('You must have a project open in order to save project changes to the cloud');
             return;
         }
 
@@ -329,7 +361,6 @@ export class QCAlgorithmProject {
      */
     public static getOpenProject(): QCAlgorithmProject | undefined {
         if (!vscode.window.activeTextEditor) {
-            vscode.window.showErrorMessage('You must have a file open in order to save to the cloud');
             return;
         }
 
@@ -337,7 +368,6 @@ export class QCAlgorithmProject {
         let doc = editor.document;
 
         if (doc.isUntitled) {
-            vscode.window.showErrorMessage('Your file must not be untitled in order to save to the cloud');
             return;
         }
 
@@ -354,6 +384,22 @@ export class QCAlgorithmProject {
         for (let project of Projects) {
             if (project.projectPath === projectPath) {
                 return project;
+            }
+        }
+    }
+
+    public static getOpenFile(project: QCAlgorithmProject | undefined): QCProjectFile | undefined {
+        let doc = vscode.window.activeTextEditor;
+
+        if (!project) {
+            return;
+        }
+        if (!doc) {
+            return;
+        }
+        for (let file of project.files) {
+            if (file.filePath === doc.document.fileName) {
+                return file;
             }
         }
     }
@@ -449,7 +495,7 @@ export class QCProjectFile {
         fs.writeFileSync(this.filePath, this.content);
     }
 
-    public async reloadFileFromDisk() {
+    public reloadFileFromDisk() {
         this.content = fs.readFileSync(this.filePath).toString();
     }
 

@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
+import { VERSION } from './extension';
 
 /**Programming language used for project */
 export enum Language {
@@ -958,6 +959,7 @@ export class LeanApi {
         options.headers['Authorization'] = `Basic ${authHash}`;
         // Set Timestamp in header. Required for a successful request
         options.headers['Timestamp'] = timestamp;
+        options.headers['User-Agent'] = `VSCode QC Extension ${VERSION}`;
 
         switch (method) {
             case Method.GET:
